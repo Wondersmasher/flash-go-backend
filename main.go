@@ -1,34 +1,37 @@
 package main
 
 import (
-	"context"
+	// "context"
 	"fmt"
 
+	"github.com/flash-backend/routes"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	// "github.com/redis/go-redis/v9"
+	// "go.mongodb.org/mongo-driver/v2/mongo"
+	// "go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func main() {
 	fmt.Println("Hello, World!")
 
 	g := gin.Default()
+
+	routes.RegisterAllRoutes(g)
+
 	g.Run(":8080")
+	// redis.NewClient(&redis.Options{
+	// 	Addr:     "localhost:6379",
+	// 	Password: "",
+	// 	DB:       0,
+	// })
 
-	redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
+	// client, err := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017"))
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer client.Disconnect(context.TODO())
 
-	client, err := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017"))
-	if err != nil {
-		panic(err)
-	}
-	defer client.Disconnect(context.TODO())
-
-	collection := client.Database("testdb").Collection("testcol")
-	fmt.Println(collection)
+	// collection := client.Database("testdb").Collection("testcol")
+	// fmt.Println(collection)
 
 }
