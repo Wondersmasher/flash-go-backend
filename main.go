@@ -3,9 +3,13 @@ package main
 import (
 	// "context"
 	"fmt"
+	"log"
 
+	"github.com/flash-backend/config"
+	"github.com/flash-backend/db"
 	"github.com/flash-backend/routes"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	// "github.com/redis/go-redis/v9"
 	// "go.mongodb.org/mongo-driver/v2/mongo"
 	// "go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -14,24 +18,21 @@ import (
 func main() {
 	fmt.Println("Hello, World!")
 
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// gin.SetMode(gin.ReleaseMode)
 	g := gin.Default()
+	g.Use(gin.Logger())
+
+	config.Env()
+	db.InitMongoDB()
 
 	routes.RegisterAllRoutes(g)
 
 	g.Run(":8080")
-	// redis.NewClient(&redis.Options{
-	// 	Addr:     "localhost:6379",
-	// 	Password: "",
-	// 	DB:       0,
-	// })
-
-	// client, err := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017"))
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer client.Disconnect(context.TODO())
-
-	// collection := client.Database("testdb").Collection("testcol")
-	// fmt.Println(collection)
 
 }
