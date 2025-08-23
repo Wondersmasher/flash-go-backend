@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/flash-backend/config"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -15,6 +16,8 @@ var Database *mongo.Database
 
 func InitMongoDB() {
 	log.Println("Initializing MongoDB...")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	client, err := mongo.Connect(options.Client().ApplyURI(config.MONGO_DB_URL))
 	if err != nil {
@@ -23,11 +26,11 @@ func InitMongoDB() {
 
 	log.Println("Connected to MongoDB!")
 	Database = client.Database(config.MONGO_DB_DATABASE)
-	Database.Collection("users").Drop(context.TODO())
-	Database.Collection("products").Drop(context.TODO())
-	Database.Collection("orders").Drop(context.TODO())
-	Database.Collection("payments").Drop(context.TODO())
-	Database.Collection(config.SALT).Drop(context.TODO())
+	Database.Collection("users").Drop(ctx)
+	Database.Collection("products").Drop(ctx)
+	Database.Collection("orders").Drop(ctx)
+	Database.Collection("payments").Drop(ctx)
+	Database.Collection(config.SALT).Drop(ctx)
 	CreateCollectionAndValidate(Database)
 	// log.Println("MongoDB Initialized:", Collection.Name())
 }
@@ -93,12 +96,12 @@ func CreateCollectionAndValidate(db *mongo.Database) {
 	// Loop and create collections with validators
 	for col, validator := range validators {
 		opts := options.CreateCollection().SetValidator(validator)
-		err := db.CreateCollection(context.TODO(), col, opts)
-		if err != nil {
+		if err := db.CreateCollection(context.TODO(), col, opts); err != nil {
 			log.Printf("Collection %s might already exist: %v\n", col, err)
 		} else {
 			log.Printf("Collection %s created with validator!\n", col)
 		}
+
 		coll := db.Collection(col)
 		idxModel := []mongo.IndexModel{}
 

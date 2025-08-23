@@ -29,6 +29,7 @@ func main() {
 	g.Use(gin.Logger())
 
 	config.Env()
+	db.InitRedis()
 	db.InitMongoDB()
 
 	routes.RegisterAllRoutes(g)
