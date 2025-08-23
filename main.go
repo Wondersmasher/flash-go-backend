@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello, World!")
+	fmt.Println("Hello, Flash!")
 
 	err := godotenv.Load()
 
@@ -24,7 +24,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	// gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	g := gin.Default()
 	g.Use(gin.Logger())
 

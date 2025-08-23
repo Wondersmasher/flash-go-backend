@@ -23,6 +23,11 @@ func InitMongoDB() {
 
 	log.Println("Connected to MongoDB!")
 	Database = client.Database(config.MONGO_DB_DATABASE)
+	Database.Collection("users").Drop(context.TODO())
+	Database.Collection("products").Drop(context.TODO())
+	Database.Collection("orders").Drop(context.TODO())
+	Database.Collection("payments").Drop(context.TODO())
+	Database.Collection(config.SALT).Drop(context.TODO())
 	CreateCollectionAndValidate(Database)
 	// log.Println("MongoDB Initialized:", Collection.Name())
 }
@@ -71,7 +76,7 @@ func CreateCollectionAndValidate(db *mongo.Database) {
 				},
 			},
 		},
-		"reviews": {
+		config.SALT: {
 			"$jsonSchema": bson.M{
 				"bsonType": "object",
 				"required": []string{"userId", "productId", "rating"},
@@ -90,10 +95,53 @@ func CreateCollectionAndValidate(db *mongo.Database) {
 		opts := options.CreateCollection().SetValidator(validator)
 		err := db.CreateCollection(context.TODO(), col, opts)
 		if err != nil {
-			// If collection already exists, ignore error
 			log.Printf("Collection %s might already exist: %v\n", col, err)
 		} else {
 			log.Printf("Collection %s created with validator!\n", col)
+		}
+		coll := db.Collection(col)
+		idxModel := []mongo.IndexModel{}
+
+		switch col {
+		case "users":
+			idxModel = append(idxModel, mongo.IndexModel{
+				Keys:    bson.D{{Key: "email", Value: 1}},
+				Options: options.Index().SetUnique(true),
+			},
+				mongo.IndexModel{
+					Keys:    bson.D{{Key: "_id", Value: 1}},
+					Options: options.Index().SetUnique(true),
+				}, mongo.IndexModel{
+					Keys:    bson.D{{Key: "name", Value: 1}},
+					Options: options.Index().SetUnique(true),
+				},
+			)
+		case "products":
+			idxModel = append(idxModel, mongo.IndexModel{
+				Keys:    bson.D{{Key: "title", Value: 1}},
+				Options: options.Index().SetUnique(true),
+			})
+		case "orders":
+			idxModel = append(idxModel, mongo.IndexModel{
+				Keys: bson.D{{Key: "userId", Value: 1}},
+			})
+		case "payments":
+			idxModel = append(idxModel, mongo.IndexModel{
+				Keys: bson.D{{Key: "orderId", Value: 1}},
+			})
+		case config.SALT:
+			idxModel = append(idxModel, mongo.IndexModel{
+				Keys: bson.D{{Key: "userId", Value: 1}, {Key: "productId", Value: 1}, {Key: "rating", Value: 1}},
+			})
+		}
+
+		if len(idxModel) > 0 {
+			_, err := coll.Indexes().CreateMany(context.Background(), idxModel)
+			if err != nil {
+				log.Printf("Error creating indexes for %s: %v", col, err)
+			} else {
+				log.Printf("Indexes created for %s", col)
+			}
 		}
 	}
 }
