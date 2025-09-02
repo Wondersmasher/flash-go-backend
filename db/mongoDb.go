@@ -12,6 +12,10 @@ import (
 )
 
 var Collection *mongo.Collection
+var UsersCollection *mongo.Collection
+var ProductsCollection *mongo.Collection
+var OrdersCollection *mongo.Collection
+var PaymentsCollection *mongo.Collection
 var Database *mongo.Database
 
 func InitMongoDB() {
@@ -26,10 +30,17 @@ func InitMongoDB() {
 
 	log.Println("Connected to MongoDB!")
 	Database = client.Database(config.MONGO_DB_DATABASE)
-	Database.Collection("users").Drop(ctx)
-	Database.Collection("products").Drop(ctx)
-	Database.Collection("orders").Drop(ctx)
-	Database.Collection("payments").Drop(ctx)
+
+	UsersCollection = Database.Collection("users")
+	ProductsCollection = Database.Collection("products")
+	OrdersCollection = Database.Collection("orders")
+	PaymentsCollection = Database.Collection("payments")
+
+	UsersCollection.Drop(ctx)
+	ProductsCollection.Drop(ctx)
+	OrdersCollection.Drop(ctx)
+	PaymentsCollection.Drop(ctx)
+
 	Database.Collection(config.SALT).Drop(ctx)
 	CreateCollectionAndValidate(Database)
 	// log.Println("MongoDB Initialized:", Collection.Name())
