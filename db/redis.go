@@ -19,7 +19,7 @@ func InitRedis() {
 		Protocol: 2,
 	})
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	err := client.Set(ctx, "foo2", "bar", 0).Err()
