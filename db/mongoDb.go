@@ -11,7 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var Collection *mongo.Collection
 var UsersCollection *mongo.Collection
 var ProductsCollection *mongo.Collection
 var OrdersCollection *mongo.Collection
